@@ -19,6 +19,9 @@ gem install $GEM \
 
 cd $PKG
 
+ARCH=noarch
+BUILD=1cyco
+
 NAME=$(grep "s\.name = " $PKG$GEMSROOT/specifications/*.gemspec | grep -o "%q{.*}" | sed 's|%q{||' | tr -d '}')
 VERSION=$(grep "s\.version = " $PKG$GEMSROOT/specifications/*.gemspec | grep -o "\".*\"" | tr -d '"')
 
@@ -37,4 +40,4 @@ $NAME: $(grep "s\.homepage = " $PKG$GEMSROOT/specifications/*.gemspec | grep -o 
 $NAME:
 EOF
 
-makepkg --linkadd y --chown n $TMP/$NAME-$VERSION.txz
+makepkg --linkadd y --chown n $TMP/$NAME-$VERSION-$ARCH-$BUILD.txz
