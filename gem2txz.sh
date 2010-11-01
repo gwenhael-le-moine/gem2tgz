@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright (C) 2009 by Cycojesus
+# Copyright © 2009-2010 by Cycojesus
 
 GEM=$1
 
