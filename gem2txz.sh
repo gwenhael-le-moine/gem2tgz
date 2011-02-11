@@ -41,4 +41,4 @@ $NAME: $(grep "s\.homepage = " $PKG$GEMSROOT/specifications/*.gemspec | grep -o 
 $NAME:
 EOF
 
-makepkg --linkadd y --chown n $TMP/$NAME-$VERSION-$ARCH-$BUILD.txz
+makepkg --linkadd y --chown n $TMP/rubygem-$NAME-$VERSION-$ARCH-$BUILD.txz
