@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright (C) 2009 by Cycojesus
+# Copyright © 2009-2010 by Cycojesus
 
 GEMSROOT=$(gem environment gemdir)
 
@@ -39,4 +39,4 @@ $NAME: $(grep "s\.homepage = " $PKG$GEMSROOT/specifications/*.gemspec | grep -o 
 $NAME:
 EOF
 
-makepkg --linkadd y --chown n $TMP/$NAME-$VERSION-$ARCH-$BUILD.txz
+makepkg --linkadd y --chown n $TMP/rubygem-$NAME-$VERSION-$ARCH-$BUILD.txz
