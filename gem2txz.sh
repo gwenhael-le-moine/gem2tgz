@@ -1,12 +1,16 @@
 #!/bin/sh
-# Copyright © 2009-2010 by Cycojesus
+# Copyright © 2009-2011 by Cycojesus
 
-GEM=$1
+GEM=${GEM:-$1}
 
-GEMSROOT=$(gem environment gemdir)
+ARCH=${ARCH:-noarch}
+BUILD=${BUILD:-1}
+PACKAGER=${PACKAGER:-cyco}
+OUTPUT=${OUTPUT:-/tmp}
+TMP=${TMP:-/tmp/$PACKAGER}
+PKG=${PKG:-$TMP/pkg-rubygem-$GEM}
 
-TMP=/tmp
-PKG=$TMP/packagingagem
+GEMSROOT=${GEMSROOT:-$(gem environment gemdir)}
 
 rm -fr $PKG
 
@@ -20,25 +24,22 @@ gem install $GEM \
 
 cd $PKG
 
-ARCH=noarch
-BUILD=1cyco
-
-NAME=$(grep "s\.name = " $PKG$GEMSROOT/specifications/*.gemspec | grep -o "%q{.*}" | sed 's|%q{||' | tr -d '}')
+PRGNAM=rubygem-$(grep "s\.name = " $PKG$GEMSROOT/specifications/*.gemspec | grep -o "%q{.*}" | sed 's|%q{||' | tr -d '}')
 VERSION=$(grep "s\.version = " $PKG$GEMSROOT/specifications/*.gemspec | grep -o "\".*\"" | tr -d '"')
 
 mkdir -p $PKG/install
 cat <<EOF > $PKG/install/slack-desc
-$NAME: $NAME ($(grep "s\.summary = " $PKG$GEMSROOT/specifications/*.gemspec | grep -o "%q{.*}" | sed 's|%q{||' | tr -d '}'))
-$NAME:
-$NAME: $(grep "s\.description = " $PKG$GEMSROOT/specifications/*.gemspec | grep -o "%q{.*}" | sed 's|%q{||' | tr -d '}')
-$NAME:
-$NAME:
-$NAME:
-$NAME:
-$NAME:
-$NAME:
-$NAME: $(grep "s\.homepage = " $PKG$GEMSROOT/specifications/*.gemspec | grep -o "%q{.*}" | sed 's|%q{||' | tr -d '}')
-$NAME:
+$PRGNAM: $PRGNAM ($(grep "s\.summary = " $PKG$GEMSROOT/specifications/*.gemspec | grep -o "%q{.*}" | sed 's|%q{||' | tr -d '}'))
+$PRGNAM:
+$PRGNAM: $(grep "s\.description = " $PKG$GEMSROOT/specifications/*.gemspec | grep -o "%q{.*}" | sed 's|%q{||' | tr -d '}')
+$PRGNAM:
+$PRGNAM:
+$PRGNAM:
+$PRGNAM:
+$PRGNAM:
+$PRGNAM:
+$PRGNAM: $(grep "s\.homepage = " $PKG$GEMSROOT/specifications/*.gemspec | grep -o "%q{.*}" | sed 's|%q{||' | tr -d '}')
+$PRGNAM:
 EOF
 
-makepkg --linkadd y --chown n $TMP/rubygem-$NAME-$VERSION-$ARCH-$BUILD.txz
+makepkg --linkadd y --chown n $OUTPUT/$PRGNAM-$VERSION-$ARCH-$BUILD$PACKAGER.txz
