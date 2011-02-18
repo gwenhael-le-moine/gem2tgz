@@ -16,7 +16,7 @@ rm -fr $PKG
 
 mkdir -p $PKG$GEMSROOT
 
-gem install $GEM \
+gem install $* \
     --install-dir $PKG$GEMSROOT \
     --bindir $PKG/usr/bin \
     --force \
