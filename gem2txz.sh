@@ -1,8 +1,6 @@
 #!/bin/sh
 # Copyright (C) 2009 by Cycojesus
 
-GEM=$1
-
 GEMSROOT=$(gem environment gemdir)
 
 TMP=/tmp
@@ -12,7 +10,7 @@ rm -fr $PKG
 
 mkdir -p $PKG$GEMSROOT
 
-gem install $GEM \
+gem install $* \
     --install-dir $PKG$GEMSROOT \
     --bindir $PKG/usr/bin \
     --force \
