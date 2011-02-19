@@ -98,6 +98,6 @@ $PRGNAM: $(grep "s\.homepage = " $PKG$GEMSROOT/specifications/*.gemspec | grep -
 $PRGNAM:
 EOF
 
-chown -R rooot:root .
+chown -R root:root .
 
 makepkg --linkadd y --chown n $OUTPUT/$PRGNAM-$VERSION-$ARCH-$BUILD$TAG.txz
