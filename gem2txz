@@ -2,6 +2,7 @@
 # Copyright © 2009-2011 by Cycojesus
 
 MAKE_DEPS=${MAKE_DEPS:-YES}
+PACKAGE_ALL_LOCALS=${PACKAGE_ALL_LOCALS:-NO}
 
 GEM=${GEM:-$1}
 VERSION=${VERSION:-}
@@ -19,38 +20,52 @@ GEMSROOT=${GEMSROOT:-$(gem environment gemdir)}
 while [ "x$1" != "x"  ]
 do
   case "$1" in
-      --prefix )
+      --prefix | -p )
           shift
           PREFIX=$1
           shift
           ;;
-      --nodeps )
-          MAKE_DEPS=NO
-          shift
-          ;;
-      --gem )
-          shift
-          GEM=$1
-          shift
-          ;;
-      --version )
-          shift
-          VERSION="--version $1"
-          shift
-          ;;
-      --tag )
+      --tag  | -t )
           shift
           TAG=$1
           shift
           ;;
+      --all-locals | --backup | -b )
+          PACKAGE_ALL_LOCALS=YES
+          shift
+          ;;
+      --nodeps | -n )
+          MAKE_DEPS=NO
+          shift
+          ;;
+      --gem | -g )
+          shift
+          GEM=$1
+          shift
+          ;;
+      --version | -v )
+          shift
+          VERSION="--version $1"
+          shift
+          ;;
       --help | -h )
-	      echo "--help | -h       : What you're reading at this very moment"
-	      echo ""
-	      echo "--gem <name>      : gem to package [no default]"
-	      echo "--version <x.x.x> : Package a specific version [default: latest]"
-	      echo "--prefix </path>  : Set a specific location to install [default: /usr]"
-	      echo "--nodeps          : Do not build packages of dependencies"
-	      echo "--tag <tag>       : Set a specific tag for the package's name [default: $TAG]"
+          echo -e "Usage: $0 <options>"
+          echo -e "Options:"
+	      echo -e "\t-g | --gem <name>"
+          echo -e "\t\tgem to package [no default]"
+	      echo -e "\t-v | --version <x.x.x>"
+          echo -e "\t\tPackage a specific version [default: latest]"
+	      echo -e "\t-n | --nodeps"
+          echo -e "\t\tDo not build packages of dependencies"
+	      echo -e "\t-p | --prefix </path>"
+          echo -e "\t\tSet a specific location to install [default: /usr]"
+	      echo -e "\t-t | --tag <tag>"
+          echo -e "\t\tSet a specific tag for the package's name [default: $TAG]"
+	      echo -e "\t-b | --backup | --all-locals"
+          echo -e "\t\tGenerate packages for ALL gems installed locally"
+	      echo -e ""
+	      echo -e "\t-h | --help"
+          echo -e "\t\tWhat you're reading at this very moment"
 	      exit
           ;;
       * )
@@ -59,6 +74,17 @@ do
           ;;
   esac
 done
+
+if [ $PACKAGE_ALL_LOCALS == YES ]; then
+    for g in $(gem list | tr -d \( | tr -d \) | tr \  % | sed 's|,%|,|g'); do
+        current_gem=$(echo $g | cut -d% -f1)
+        for v in $(echo $g | cut -d% -f2 | sed 's|,|\
+|g'); do
+            echo $0 --nodeps --tag $TAG --prefix $PREFIX --gem $current_gem --version $v
+        done
+    done
+    exit 0
+fi
 
 PKG=${PKG:-$TMP/pkg-rubygem-$GEM}
 
