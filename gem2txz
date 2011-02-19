@@ -28,6 +28,11 @@ do
           MAKE_DEPS=NO
           shift
           ;;
+      --gem )
+          shift
+          GEM=$1
+          shift
+          ;;
       --version )
           shift
           VERSION="--version $1"
@@ -41,8 +46,11 @@ do
       --help | -h )
 	      echo "--help | -h       : What you're reading at this very moment"
 	      echo ""
-	      echo "--prefix /prefix  : Set a specific location to install (default: /usr)"
-	      echo ""
+	      echo "--gem <name>      : gem to package"
+	      echo "--version <x.x.x> : Package a specific version (default: latest)"
+	      echo "--prefix </path>  : Set a specific location to install (default: /usr)"
+	      echo "--nodeps          : Do not build packages of dependencies"
+	      echo "--tag <tag>       : Set a specific tag for the package's name (default: $TAG)"
 	      exit
           ;;
       * )
