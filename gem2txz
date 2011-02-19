@@ -11,7 +11,7 @@ TAG=${TAG:-$(basename $0)}
 OUTPUT=${OUTPUT:-/tmp}
 TMP=${TMP:-/tmp/$TAG}
 PKG=${PKG:-$TMP/pkg-rubygem-$GEM}
-PREFIX=/usr
+PREFIX=${PREFIX:-/usr}
 
 GEMSROOT=${GEMSROOT:-$(gem environment gemdir)}
 
