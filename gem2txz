@@ -1,4 +1,4 @@
-#!/bin/sh -x
+#!/bin/sh
 # Copyright © 2009-2011 by Cycojesus
 
 MAKE_DEPS=${MAKE_DEPS:-YES}
