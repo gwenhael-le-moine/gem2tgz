@@ -5,6 +5,7 @@
 
 MAKE_DEPS=${MAKE_DEPS:-YES}
 PACKAGE_ALL_LOCALS=${PACKAGE_ALL_LOCALS:-NO}
+INSTALL=${INSTALL:-NO}
 
 GEM=${GEM:-$1}
 VERSION=${VERSION:-}
@@ -40,6 +41,10 @@ do
           MAKE_DEPS=NO
           shift
           ;;
+       -i | --install )
+          INSTALL=YES
+          shift
+          ;;
        -g | --gem )
           shift
           GEM=$1
@@ -59,6 +64,8 @@ do
           echo -e "\t\tPackage a specific version [default: latest]"
 	      echo -e "\t-n | --nodeps"
           echo -e "\t\tDo not build packages of dependencies"
+	      echo -e "\t-i | --install"
+          echo -e "\t\tInstall the package"
 	      echo -e "\t-b | --bindir </path>"
           echo -e "\t\tSet a non-standard location where to install binaries [default: /usr/bin]"
 	      echo -e "\t-t | --tag <tag>"
@@ -82,7 +89,7 @@ if [ $PACKAGE_ALL_LOCALS == YES ]; then
         current_gem=$(echo $g | cut -d% -f1)
         for v in $(echo $g | cut -d% -f2 | sed 's|,|\
 |g'); do
-            echo $0 --nodeps --tag $TAG --bindir $BINDIR --gem $current_gem --version $v
+            INSTALL=$INSTALL $0 --nodeps --tag $TAG --bindir $BINDIR --gem $current_gem --version $v
         done
     done
     exit 0
@@ -129,3 +136,5 @@ EOF
 chown -R root:root .
 
 makepkg --linkadd y --chown n $OUTPUT/$PRGNAM-$VERSION-$ARCH-$BUILD$TAG.txz
+
+[ $INSTALL == YES ] && upgradepkg --install-new --reinstall $OUTPUT/$PRGNAM-$VERSION-$ARCH-$BUILD$TAG.txz
