@@ -98,7 +98,7 @@ fi
 PKG=${PKG:-$TMP/pkg-rubygem-$GEM}
 
 if [ $MAKE_DEPS == YES ]; then
-    for i in $(gem dependency --pipe --remote $* | cut -d\  -f1); do
+    for i in $(gem dependency --pipe --remote $GEM | cut -d\  -f1); do
         $0 $i
     done
 fi
