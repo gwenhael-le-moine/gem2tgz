@@ -1,6 +1,8 @@
 #!/bin/sh
 # Copyright © 2009-2011 by Cycojesus
 
+[ "x$1" == "x" ] && $0 --help && exit 0
+
 MAKE_DEPS=${MAKE_DEPS:-YES}
 PACKAGE_ALL_LOCALS=${PACKAGE_ALL_LOCALS:-NO}
 
@@ -17,7 +19,7 @@ BINDIR=${BINDIR:-/usr}
 GEMSROOT=${GEMSROOT:-$(gem environment gemdir)}
 
 # commandline arguments processing
-while [ "x$1" != "x"  ]
+while [ "x$1" != "x" ]
 do
   case "$1" in
        -b | --bindir )
