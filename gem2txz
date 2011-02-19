@@ -16,10 +16,9 @@ PREFIX=/usr
 GEMSROOT=${GEMSROOT:-$(gem environment gemdir)}
 
 if [ $MAKE_DEPS == YES ]; then
-    TEMP_SCRIPT=$(mktemp)
-    gem dependency --pipe --remote $* | sed "s|^\(.*\)$|$0 \1;|g" | sed "s|'|\\'|g" > $TEMP_SCRIPT
-    /bin/sh $TEMP_SCRIPT
-    rm $TEMP_SCRIPT
+    for i in $(gem dependency --pipe --remote $* | cut -d\  -f1); do
+        $0 $i
+    done
 fi
 
 rm -fr $PKG
