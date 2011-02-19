@@ -1,5 +1,7 @@
-#!/bin/sh
+#!/bin/sh -x
 # Copyright © 2009-2011 by Cycojesus
+
+MAKE_DEPS=${MAKE_DEPS:-NO}
 
 GEM=${GEM:-$1}
 
@@ -12,6 +14,13 @@ PKG=${PKG:-$TMP/pkg-rubygem-$GEM}
 PREFIX=/usr
 
 GEMSROOT=${GEMSROOT:-$(gem environment gemdir)}
+
+if [ $MAKE_DEPS == YES ]; then
+    TEMP_SCRIPT=$(mktemp)
+    gem dependency --pipe --remote $* | sed "s|^\(.*\)$|$0 \1;|g" | sed "s|'|\\'|g" > $TEMP_SCRIPT
+    /bin/sh $TEMP_SCRIPT
+    rm $TEMP_SCRIPT
+fi
 
 rm -fr $PKG
 
