@@ -5,9 +5,9 @@ GEM=${GEM:-$1}
 
 ARCH=${ARCH:-noarch}
 BUILD=${BUILD:-1}
-PACKAGER=${PACKAGER:-cyco}
+TAG=${TAG:-cyco}
 OUTPUT=${OUTPUT:-/tmp}
-TMP=${TMP:-/tmp/$PACKAGER}
+TMP=${TMP:-/tmp/$TAG}
 PKG=${PKG:-$TMP/pkg-rubygem-$GEM}
 
 GEMSROOT=${GEMSROOT:-$(gem environment gemdir)}
@@ -42,4 +42,4 @@ $PRGNAM: $(grep "s\.homepage = " $PKG$GEMSROOT/specifications/*.gemspec | grep -
 $PRGNAM:
 EOF
 
-makepkg --linkadd y --chown n $OUTPUT/$PRGNAM-$VERSION-$ARCH-$BUILD$PACKAGER.txz
+makepkg --linkadd y --chown n $OUTPUT/$PRGNAM-$VERSION-$ARCH-$BUILD$TAG.txz
