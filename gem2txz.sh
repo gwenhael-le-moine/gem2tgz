@@ -9,6 +9,7 @@ TAG=${TAG:-$(basename $0)}
 OUTPUT=${OUTPUT:-/tmp}
 TMP=${TMP:-/tmp/$TAG}
 PKG=${PKG:-$TMP/pkg-rubygem-$GEM}
+PREFIX=/usr
 
 GEMSROOT=${GEMSROOT:-$(gem environment gemdir)}
 
@@ -18,7 +19,7 @@ mkdir -p $PKG$GEMSROOT
 
 gem install $* \
     --install-dir $PKG$GEMSROOT \
-    --bindir $PKG/usr/bin \
+    --bindir $PKG$PREFIX/bin \
     --force \
     --ignore-dependencies
 
