@@ -4,16 +4,55 @@
 MAKE_DEPS=${MAKE_DEPS:-YES}
 
 GEM=${GEM:-$1}
+VERSION=${VERSION:-}
 
 ARCH=${ARCH:-noarch}
 BUILD=${BUILD:-1}
 TAG=${TAG:-$(basename $0)}
 OUTPUT=${OUTPUT:-/tmp}
 TMP=${TMP:-/tmp/$TAG}
-PKG=${PKG:-$TMP/pkg-rubygem-$GEM}
 PREFIX=${PREFIX:-/usr}
 
 GEMSROOT=${GEMSROOT:-$(gem environment gemdir)}
+
+# commandline arguments processing
+while [ "x$1" != "x"  ]
+do
+  case "$1" in
+      --prefix )
+          shift
+          PREFIX=$1
+          shift
+          ;;
+      --nodeps )
+          MAKE_DEPS=NO
+          shift
+          ;;
+      --version )
+          shift
+          VERSION="--version $1"
+          shift
+          ;;
+      --tag )
+          shift
+          TAG=$1
+          shift
+          ;;
+      --help | -h )
+	      echo "--help | -h       : What you're reading at this very moment"
+	      echo ""
+	      echo "--prefix /prefix  : Set a specific location to install (default: /usr)"
+	      echo ""
+	      exit
+          ;;
+      * )
+          GEM=$1
+          shift
+          ;;
+  esac
+done
+
+PKG=${PKG:-$TMP/pkg-rubygem-$GEM}
 
 if [ $MAKE_DEPS == YES ]; then
     for i in $(gem dependency --pipe --remote $* | cut -d\  -f1); do
@@ -25,7 +64,7 @@ rm -fr $PKG
 
 mkdir -p $PKG$GEMSROOT
 
-gem install $* \
+gem install $GEM $VERSION \
     --install-dir $PKG$GEMSROOT \
     --bindir $PKG$PREFIX/bin \
     --force \
