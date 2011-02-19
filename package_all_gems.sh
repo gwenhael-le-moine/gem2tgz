@@ -10,5 +10,5 @@ echo "We have $NB_GEMS gems to pack"
 for GEM in $GEMSLIST ; do
     i=$(expr $i + 1)
     echo "$i/$NB_GEMS : Processing $GEM"
-    gem2txz.sh $GEM
+    gem2txz $GEM
 done
