@@ -12,7 +12,7 @@ BUILD=${BUILD:-1}
 TAG=${TAG:-$(basename $0)}
 OUTPUT=${OUTPUT:-/tmp}
 TMP=${TMP:-/tmp/$TAG}
-PREFIX=${PREFIX:-/usr}
+BINDIR=${BINDIR:-/usr}
 
 GEMSROOT=${GEMSROOT:-$(gem environment gemdir)}
 
@@ -20,35 +20,35 @@ GEMSROOT=${GEMSROOT:-$(gem environment gemdir)}
 while [ "x$1" != "x"  ]
 do
   case "$1" in
-      --prefix | -p )
+       -b | --bindir )
           shift
-          PREFIX=$1
+          BINDIR=$1
           shift
           ;;
-      --tag  | -t )
+        -t | --tag )
           shift
           TAG=$1
           shift
           ;;
-      --all-locals | --backup | -b )
+       -a | --all-locals | --backup )
           PACKAGE_ALL_LOCALS=YES
           shift
           ;;
-      --nodeps | -n )
+       -n | --nodeps )
           MAKE_DEPS=NO
           shift
           ;;
-      --gem | -g )
+       -g | --gem )
           shift
           GEM=$1
           shift
           ;;
-      --version | -v )
+       -v | --version )
           shift
           VERSION="--version $1"
           shift
           ;;
-      --help | -h )
+       -h | --help )
           echo -e "Usage: $0 <options>"
           echo -e "Options:"
 	      echo -e "\t-g | --gem <name>"
@@ -57,11 +57,11 @@ do
           echo -e "\t\tPackage a specific version [default: latest]"
 	      echo -e "\t-n | --nodeps"
           echo -e "\t\tDo not build packages of dependencies"
-	      echo -e "\t-p | --prefix </path>"
-          echo -e "\t\tSet a specific location to install [default: /usr]"
+	      echo -e "\t-b | --bindir </path>"
+          echo -e "\t\tSet a non-standard location where to install binaries [default: /usr/bin]"
 	      echo -e "\t-t | --tag <tag>"
           echo -e "\t\tSet a specific tag for the package's name [default: $TAG]"
-	      echo -e "\t-b | --backup | --all-locals"
+	      echo -e "\t-a | --backup | --all-locals"
           echo -e "\t\tGenerate packages for ALL gems installed locally"
 	      echo -e ""
 	      echo -e "\t-h | --help"
@@ -80,7 +80,7 @@ if [ $PACKAGE_ALL_LOCALS == YES ]; then
         current_gem=$(echo $g | cut -d% -f1)
         for v in $(echo $g | cut -d% -f2 | sed 's|,|\
 |g'); do
-            echo $0 --nodeps --tag $TAG --prefix $PREFIX --gem $current_gem --version $v
+            echo $0 --nodeps --tag $TAG --bindir $BINDIR --gem $current_gem --version $v
         done
     done
     exit 0
@@ -100,7 +100,7 @@ mkdir -p $PKG$GEMSROOT
 
 gem install $GEM $VERSION \
     --install-dir $PKG$GEMSROOT \
-    --bindir $PKG$PREFIX/bin \
+    --bindir $PKG$BINDIR \
     --force \
     --ignore-dependencies
 
