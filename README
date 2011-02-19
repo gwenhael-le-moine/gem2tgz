@@ -1,0 +1,3 @@
+Script to create Slackware packages from rubygems.
+
+see ./gem2txz --help for more details.
