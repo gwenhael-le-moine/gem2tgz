@@ -5,7 +5,7 @@ GEM=${GEM:-$1}
 
 ARCH=${ARCH:-noarch}
 BUILD=${BUILD:-1}
-TAG=${TAG:-cyco}
+TAG=${TAG:-$(basename $0)}
 OUTPUT=${OUTPUT:-/tmp}
 TMP=${TMP:-/tmp/$TAG}
 PKG=${PKG:-$TMP/pkg-rubygem-$GEM}
