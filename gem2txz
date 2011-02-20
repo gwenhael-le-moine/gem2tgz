@@ -3,7 +3,7 @@
 
 [ "x$1" == "x" ] && $0 --help && exit 0
 
-MAKE_DEPS=${MAKE_DEPS:-YES}
+MAKE_DEPS=${MAKE_DEPS:-NO}
 PACKAGE_ALL_LOCALS=${PACKAGE_ALL_LOCALS:-NO}
 INSTALL=${INSTALL:-NO}
 
@@ -98,8 +98,8 @@ fi
 PKG=${PKG:-$TMP/pkg-rubygem-$GEM}
 
 if [ $MAKE_DEPS == YES ]; then
-    for i in $(gem dependency --pipe --remote $GEM | cut -d\  -f1); do
-        $0 $i
+    for i in $(gem dependency --pipe --remote $GEM | cut -d\  -f1 | sort | uniq); do
+        sh $0 $i
     done
 fi
 
