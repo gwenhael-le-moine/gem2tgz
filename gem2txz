@@ -159,5 +159,5 @@ EOF
 
     makepkg --linkadd y --chown n $OUTPUT/$PRGNAM-$VERSION-$ARCH-$BUILD$TAG.txz
 
-    [ "x$INSTALL" == "x--install" ] && upgradepkg --install-new --reinstall $OUTPUT/$PRGNAM-$VERSION-$ARCH-$BUILD$TAG.txz
+    [ "x$INSTALL" == "x--install" ] && installpkg $OUTPUT/$PRGNAM-$VERSION-$ARCH-$BUILD$TAG.txz
 fi
