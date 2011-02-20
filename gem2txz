@@ -50,7 +50,7 @@ do
             INSTALL=--install
             shift
             ;;
-        -t | --dry-run )
+        -f | --dry-run )
             DRY_RUN=--dry-run
             shift
             ;;
@@ -79,7 +79,7 @@ do
             fi
 	        echo -e "\t-i | --install"
             echo -e "\t\tInstall the package"
-	        echo -e "\t-t | --dry-run"
+	        echo -e "\t-f | --dry-run"
             echo -e "\t\tOnly display what would be done"
 	        echo -e "\t-b | --bindir </path>"
             echo -e "\t\tSet a non-standard location where to install binaries [default: /usr/bin]"
@@ -138,6 +138,7 @@ else
 
     PRGNAM=rubygem-$(grep "s\.name = " $PKG$GEMSROOT/specifications/*.gemspec | grep -o "%q{.*}" | sed 's|%q{||' | tr -d '}')
     VERSION=$(grep "s\.version = " $PKG$GEMSROOT/specifications/*.gemspec | grep -o "\".*\"" | tr -d '"')
+    ARCH=$([[ $(find pkg-rubygem-ffi -name \*.o -o -name \*.so | wc -l) > 0 ]] && echo $(uname -m) || echo noarch)
 
     mkdir -p $PKG/install
     cat <<EOF > $PKG/install/slack-desc
