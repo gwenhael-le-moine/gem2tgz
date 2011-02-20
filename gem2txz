@@ -37,6 +37,10 @@ do
           PACKAGE_ALL_LOCALS=YES
           shift
           ;;
+       -d | --deps )
+          MAKE_DEPS=YES
+          shift
+          ;;
        -n | --nodeps )
           MAKE_DEPS=NO
           shift
@@ -64,6 +68,8 @@ do
           echo -e "\t\tPackage a specific version [default: latest]"
 	      echo -e "\t-n | --nodeps"
           echo -e "\t\tDo not build packages of dependencies"
+	      echo -e "\t-d | --deps"
+          echo -e "\t\nBuild packages of dependencies"
 	      echo -e "\t-i | --install"
           echo -e "\t\tInstall the package"
 	      echo -e "\t-b | --bindir </path>"
