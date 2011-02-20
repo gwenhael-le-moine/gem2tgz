@@ -3,11 +3,12 @@
 
 [ "x$1" == "x" ] && $0 --help && exit 0
 
-MAKE_DEPS=${MAKE_DEPS:-NO}
-PACKAGE_ALL_LOCALS=${PACKAGE_ALL_LOCALS:-NO}
-INSTALL=${INSTALL:-NO}
+EXPERIMENTAL=${EXPERIMENTAL:-NO}
 
-GEM=${GEM:-$1}
+MAKE_DEPS=${MAKE_DEPS:-}
+PACKAGE_ALL_LOCALS=${PACKAGE_ALL_LOCALS:-}
+INSTALL=${INSTALL:-}
+DRY_RUN=${DRY_RUN:-}
 VERSION=${VERSION:-}
 
 ARCH=${ARCH:-noarch}
@@ -15,117 +16,131 @@ BUILD=${BUILD:-1}
 TAG=${TAG:-$(basename $0)}
 OUTPUT=${OUTPUT:-/tmp}
 TMP=${TMP:-/tmp/$TAG}
-BINDIR=${BINDIR:-/usr}
+BINDIR=${BINDIR:-/usr/bin}
 
 GEMSROOT=${GEMSROOT:-$(gem environment gemdir)}
 
 # commandline arguments processing
 while [ "x$1" != "x" ]
 do
-  case "$1" in
-       -b | --bindir )
-          shift
-          BINDIR=$1
-          shift
-          ;;
+    case "$1" in
+        -b | --bindir )
+            shift
+            BINDIR=$1
+            shift
+            ;;
         -t | --tag )
-          shift
-          TAG=$1
-          shift
-          ;;
-       -a | --all-locals | --backup )
-          PACKAGE_ALL_LOCALS=YES
-          shift
-          ;;
-       -d | --deps )
-          MAKE_DEPS=YES
-          shift
-          ;;
-       -n | --nodeps )
-          MAKE_DEPS=NO
-          shift
-          ;;
-       -i | --install )
-          INSTALL=YES
-          shift
-          ;;
-       -g | --gem )
-          shift
-          GEM=$1
-          shift
-          ;;
-       -v | --version )
-          shift
-          VERSION="--version $1"
-          shift
-          ;;
-       -h | --help )
-          echo -e "Usage: $0 <options>"
-          echo -e "Options:"
-	      echo -e "\t-g | --gem <name>"
-          echo -e "\t\tgem to package [no default]"
-	      echo -e "\t-v | --version <x.x.x>"
-          echo -e "\t\tPackage a specific version [default: latest]"
-	      echo -e "\t-n | --nodeps"
-          echo -e "\t\tDo not build packages of dependencies"
-	      echo -e "\t-d | --deps"
-          echo -e "\t\nBuild packages of dependencies"
-	      echo -e "\t-i | --install"
-          echo -e "\t\tInstall the package"
-	      echo -e "\t-b | --bindir </path>"
-          echo -e "\t\tSet a non-standard location where to install binaries [default: /usr/bin]"
-	      echo -e "\t-t | --tag <tag>"
-          echo -e "\t\tSet a specific tag for the package's name [default: $TAG]"
-	      echo -e "\t-a | --backup | --all-locals"
-          echo -e "\t\tGenerate packages for ALL gems installed locally"
-	      echo -e ""
-	      echo -e "\t-h | --help"
-          echo -e "\t\tWhat you're reading at this very moment"
-	      exit
-          ;;
-      * )
-          GEM=$1
-          shift
-          ;;
-  esac
+            shift
+            TAG=$1
+            shift
+            ;;
+        -a | --all-locals | --backup )
+            PACKAGE_ALL_LOCALS=--backup
+            shift
+            ;;
+        -d | --deps )
+            MAKE_DEPS=--deps
+            shift
+            ;;
+        -n | --nodeps )
+            MAKE_DEPS=--nodeps
+            shift
+            ;;
+        -i | --install )
+            INSTALL=--install
+            shift
+            ;;
+        -t | --dry-run )
+            DRY_RUN=--dry-run
+            shift
+            ;;
+        -g | --gem )
+            shift
+            GEM=$1
+            shift
+            ;;
+        -v | --version )
+            shift
+            VERSION="--version $1"
+            shift
+            ;;
+        -h | --help )
+            echo -e "Usage: $0 <options>"
+            echo -e "Options:"
+	        echo -e "\t-g | --gem <name>"
+            echo -e "\t\tgem to package [no default]"
+	        echo -e "\t-v | --version <x.x.x>"
+            echo -e "\t\tPackage a specific version [default: latest]"
+            if [ $EXPERIMENTAL == YES ]; then
+	            echo -e "\t-n | --nodeps"
+                echo -e "\t\tDo not build packages of dependencies"
+	            echo -e "\t-d | --deps"
+                echo -e "\t\nBuild packages of dependencies"
+            fi
+	        echo -e "\t-i | --install"
+            echo -e "\t\tInstall the package"
+	        echo -e "\t-t | --dry-run"
+            echo -e "\t\tOnly display what would be done"
+	        echo -e "\t-b | --bindir </path>"
+            echo -e "\t\tSet a non-standard location where to install binaries [default: /usr/bin]"
+	        echo -e "\t-t | --tag <tag>"
+            echo -e "\t\tSet a specific tag for the package's name [default: $TAG]"
+	        echo -e "\t-a | --backup | --all-locals"
+            echo -e "\t\tGenerate packages for ALL gems installed locally"
+	        echo -e ""
+	        echo -e "\t-h | --help"
+            echo -e "\t\tWhat you're reading at this very moment"
+	        exit
+            ;;
+        * )
+            GEM=$1
+            shift
+            ;;
+    esac
 done
 
-if [ $PACKAGE_ALL_LOCALS == YES ]; then
+PKG=${PKG:-$TMP/pkg-rubygem-$GEM}
+
+if [ "x$PACKAGE_ALL_LOCALS" == "x--backup" ]; then
     for g in $(gem list | tr -d \( | tr -d \) | tr \  % | sed 's|,%|,|g'); do
         current_gem=$(echo $g | cut -d% -f1)
         for v in $(echo $g | cut -d% -f2 | sed 's|,|\
 |g'); do
-            INSTALL=$INSTALL $0 --nodeps --tag $TAG --bindir $BINDIR --gem $current_gem --version $v
+            $0 $INSTALL $DRY_RUN --nodeps --tag $TAG --bindir $BINDIR --gem $current_gem --version $v
         done
     done
     exit 0
 fi
 
-PKG=${PKG:-$TMP/pkg-rubygem-$GEM}
-
-if [ $MAKE_DEPS == YES ]; then
-    for i in $(gem dependency --pipe --remote $GEM | cut -d\  -f1 | sort | uniq); do
-        sh $0 $i
-    done
+if [ $EXPERIMENTAL == YES ]; then
+    if [ "x$MAKE_DEPS" == "x--deps" ]; then
+        for i in $(gem dependency --pipe --remote $GEM | cut -d\  -f1 | sort | uniq); do
+            [ ! -e /var/adm/packages/rubygem-$i* ] && $0 $INSTALL $DRY_RUN --deps --gem $i
+        done
+    fi
 fi
 
-rm -fr $PKG
+if [ "x$DRY_RUN" == "x--dry-run" ]; then
+    echo $0 $GEM
+    exit 0
+else
+    rm -fr $PKG
 
-mkdir -p $PKG$GEMSROOT
+    mkdir -p $PKG$GEMSROOT
 
-gem install $GEM $VERSION \
-    --install-dir $PKG$GEMSROOT \
-    --bindir $PKG$BINDIR \
-    --force \
-    --ignore-dependencies
+    gem install $GEM $VERSION \
+        --install-dir $PKG$GEMSROOT \
+        --bindir $PKG$BINDIR \
+        --force \
+        --ignore-dependencies
 
-cd $PKG
+    cd $PKG
 
-PRGNAM=rubygem-$(grep "s\.name = " $PKG$GEMSROOT/specifications/*.gemspec | grep -o "%q{.*}" | sed 's|%q{||' | tr -d '}')
-VERSION=$(grep "s\.version = " $PKG$GEMSROOT/specifications/*.gemspec | grep -o "\".*\"" | tr -d '"')
+    PRGNAM=rubygem-$(grep "s\.name = " $PKG$GEMSROOT/specifications/*.gemspec | grep -o "%q{.*}" | sed 's|%q{||' | tr -d '}')
+    VERSION=$(grep "s\.version = " $PKG$GEMSROOT/specifications/*.gemspec | grep -o "\".*\"" | tr -d '"')
 
-mkdir -p $PKG/install
-cat <<EOF > $PKG/install/slack-desc
+    mkdir -p $PKG/install
+    cat <<EOF > $PKG/install/slack-desc
 $PRGNAM: $PRGNAM ($(grep "s\.summary = " $PKG$GEMSROOT/specifications/*.gemspec | grep -o "%q{.*}" | sed 's|%q{||' | tr -d '}'))
 $PRGNAM:
 $PRGNAM: $(grep "s\.description = " $PKG$GEMSROOT/specifications/*.gemspec | grep -o "%q{.*}" | sed 's|%q{||' | tr -d '}')
@@ -139,8 +154,9 @@ $PRGNAM: $(grep "s\.homepage = " $PKG$GEMSROOT/specifications/*.gemspec | grep -
 $PRGNAM:
 EOF
 
-chown -R root:root .
+    chown -R root:root .
 
-makepkg --linkadd y --chown n $OUTPUT/$PRGNAM-$VERSION-$ARCH-$BUILD$TAG.txz
+    makepkg --linkadd y --chown n $OUTPUT/$PRGNAM-$VERSION-$ARCH-$BUILD$TAG.txz
 
-[ $INSTALL == YES ] && upgradepkg --install-new --reinstall $OUTPUT/$PRGNAM-$VERSION-$ARCH-$BUILD$TAG.txz
+    [ "x$INSTALL" == "x--install" ] && upgradepkg --install-new --reinstall $OUTPUT/$PRGNAM-$VERSION-$ARCH-$BUILD$TAG.txz
+fi
