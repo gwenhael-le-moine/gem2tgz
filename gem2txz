@@ -138,7 +138,7 @@ else
 
     PRGNAM=rubygem-$(grep "s\.name = " $PKG$GEMSROOT/specifications/*.gemspec | grep -o "%q{.*}" | sed 's|%q{||' | tr -d '}')
     VERSION=$(grep "s\.version = " $PKG$GEMSROOT/specifications/*.gemspec | grep -o "\".*\"" | tr -d '"')
-    ARCH=$([[ $(find pkg-rubygem-ffi -name \*.o -o -name \*.so | wc -l) > 0 ]] && echo $(uname -m) || echo noarch)
+    ARCH=$([[ $(find $PKG$GEMSROOT -name \*.o -o -name \*.so | wc -l) > 0 ]] && echo $(uname -m) || echo noarch)
 
     mkdir -p $PKG/install
     cat <<EOF > $PKG/install/slack-desc
