@@ -20,6 +20,8 @@ BINDIR=${BINDIR:-/usr/bin}
 
 GEMSROOT=${GEMSROOT:-$(gem environment gemdir)}
 
+CURRENT_GEMS=""
+
 # commandline arguments processing
 while [ "x$1" != "x" ]
 do
@@ -101,27 +103,35 @@ done
 
 PKG=${PKG:-$TMP/pkg-rubygem-$GEM}
 
-if [ "x$PACKAGE_ALL_LOCALS" == "x--backup" ]; then
+function list_local_gems_with_versions() {
+    llgwv_LIST=""
     for g in $(gem list | tr -d \( | tr -d \) | tr \  % | sed 's|,%|,|g'); do
         current_gem=$(echo $g | cut -d% -f1)
         for v in $(echo $g | cut -d% -f2 | sed 's|,|\
 |g'); do
-            $0 $INSTALL $DRY_RUN --nodeps --tag $TAG --bindir $BINDIR --gem $current_gem --version $v
+            llgwv_LIST=$(echo -e "$llgwv_LIST\n$current_gem;--version;$v")
         done
+    done
+    echo "$llgwv_LIST"
+}
+
+if [ "x$PACKAGE_ALL_LOCALS" == "x--backup" ]; then
+    for g in $(list_local_gems_with_versions); do
+        $0 $INSTALL $DRY_RUN --nodeps --tag $TAG --bindir $BINDIR --gem $(echo $g | tr \; \ )
     done
     exit 0
 fi
 
 if [ $EXPERIMENTAL == YES ]; then
     if [ "x$MAKE_DEPS" == "x--deps" ]; then
-        for i in $(gem dependency --pipe --remote $GEM | cut -d\  -f1 | sort | uniq); do
-            [ ! -e /var/adm/packages/rubygem-$i* ] && $0 $INSTALL $DRY_RUN --deps --gem $i
+        for i in $(gem dependency --pipe --remote $GEM | cut -d\  -f1 | sort | uniq | grep -v $GEM); do
+            $0 $INSTALL $DRY_RUN --deps --gem $i
         done
     fi
 fi
 
 if [ "x$DRY_RUN" == "x--dry-run" ]; then
-    echo $0 $GEM
+    echo $0 $GEM $VERSION
     exit 0
 else
     rm -fr $PKG
