@@ -5,7 +5,7 @@
 
 EXPERIMENTAL=${EXPERIMENTAL:-NO}
 
-MAKE_DEPS=${MAKE_DEPS:-}
+MAKE_DEPS=${MAKE_DEPS:---ignore-dependencies}
 PACKAGE_ALL_LOCALS=${PACKAGE_ALL_LOCALS:-}
 INSTALL=${INSTALL:-}
 DRY_RUN=${DRY_RUN:-}
@@ -41,11 +41,11 @@ do
             shift
             ;;
         -d | --deps )
-            MAKE_DEPS=--deps
+            MAKE_DEPS=
             shift
             ;;
         -n | --nodeps )
-            MAKE_DEPS=--nodeps
+            MAKE_DEPS=--ignore-dependencies
             shift
             ;;
         -i | --install )
@@ -121,10 +121,8 @@ if [ "x$PACKAGE_ALL_LOCALS" == "x--backup" ]; then
 fi
 
 if [ $EXPERIMENTAL == YES ]; then
-    if [ "x$MAKE_DEPS" == "x--deps" ]; then
-        for i in $(gem dependency --pipe --remote $GEM | cut -d\  -f1 | sort | uniq | grep -v $GEM); do
-            $0 $INSTALL $DRY_RUN --deps --gem $i
-        done
+    if [ "x$MAKE_DEPS" == "x" ]; then
+        CURRENT_GEMS=$(list_local_gems_with_versions)
     fi
 fi
 
@@ -140,7 +138,7 @@ else
         --install-dir $PKG$GEMSROOT \
         --bindir $PKG$BINDIR \
         --force \
-        --ignore-dependencies
+        $MAKE_DEPS
 
     cd $PKG
 
