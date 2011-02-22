@@ -2,5 +2,8 @@
 
 * Short-term
 ** make --deps work reliably
+** man page
+** slackbuild
+
 * Long-term
 ** rewrite in Ruby (that'd only make sense)
