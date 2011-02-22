@@ -3,7 +3,7 @@
 
 [ "x$1" == "x" ] && $0 --help && exit 0
 
-MAKE_DEPS=${MAKE_DEPS:---ignore-dependencies}
+MAKE_DEPS=${MAKE_DEPS:-}
 PACKAGE_ALL_LOCALS=${PACKAGE_ALL_LOCALS:-}
 INSTALL=${INSTALL:-}
 DRY_RUN=${DRY_RUN:-}
@@ -69,12 +69,10 @@ do
             echo -e "\t\tgem to package [no default]"
 	        echo -e "\t-v | --version <x.x.x>"
             echo -e "\t\tPackage a specific version [default: latest]"
-            if [ $EXPERIMENTAL == YES ]; then
-	            echo -e "\t-n | --nodeps"
-                echo -e "\t\tDo not build packages of dependencies"
-	            echo -e "\t-d | --deps"
-                echo -e "\t\nBuild packages of dependencies"
-            fi
+	        echo -e "\t-n | --nodeps"
+            echo -e "\t\tDo not build packages of dependencies"
+	        echo -e "\t-d | --deps"
+            echo -e "\t\nBuild packages of dependencies [default]"
 	        echo -e "\t-i | --install"
             echo -e "\t\tInstall the package"
 	        echo -e "\t-f | --dry-run"
