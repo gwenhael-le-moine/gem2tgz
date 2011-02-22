@@ -3,8 +3,6 @@
 
 [ "x$1" == "x" ] && $0 --help && exit 0
 
-EXPERIMENTAL=${EXPERIMENTAL:-NO}
-
 MAKE_DEPS=${MAKE_DEPS:---ignore-dependencies}
 PACKAGE_ALL_LOCALS=${PACKAGE_ALL_LOCALS:-}
 INSTALL=${INSTALL:-}
@@ -19,8 +17,6 @@ TMP=${TMP:-/tmp/$TAG}
 BINDIR=${BINDIR:-/usr/bin}
 
 GEMSROOT=${GEMSROOT:-$(gem environment gemdir)}
-
-CURRENT_GEMS=""
 
 # commandline arguments processing
 while [ "x$1" != "x" ]
@@ -113,17 +109,44 @@ function list_local_gems_with_versions() {
     done
 }
 
+function package_this() {
+    package_this_PKG=$1
+    INSTALL=$2
+
+    cd $package_this_PKG
+
+    PRGNAM=rubygem-$(grep "s\.name = " $package_this_PKG$GEMSROOT/specifications/*.gemspec | grep -o "%q{.*}" | sed 's|%q{||' | tr -d '}')
+    VERSION=$(grep "s\.version = " $package_this_PKG$GEMSROOT/specifications/*.gemspec | grep -o "\".*\"" | tr -d '"')
+    ARCH=$([[ $(find $package_this_PKG$GEMSROOT -name \*.o -o -name \*.so | wc -l) > 0 ]] && echo $(uname -m) || echo noarch)
+
+    mkdir -p $package_this_PKG/install
+    cat <<EOF > $package_this_PKG/install/slack-desc
+$PRGNAM: $PRGNAM ($(grep "s\.summary = " $package_this_PKG$GEMSROOT/specifications/*.gemspec | grep -o "%q{.*}" | sed 's|%q{||' | tr -d '}'))
+$PRGNAM:
+$PRGNAM: $(grep "s\.description = " $package_this_PKG$GEMSROOT/specifications/*.gemspec | grep -o "%q{.*}" | sed 's|%q{||' | tr -d '}')
+$PRGNAM:
+$PRGNAM:
+$PRGNAM:
+$PRGNAM:
+$PRGNAM:
+$PRGNAM:
+$PRGNAM: $(grep "s\.homepage = " $package_this_PKG$GEMSROOT/specifications/*.gemspec | grep -o "%q{.*}" | sed 's|%q{||' | tr -d '}')
+$PRGNAM:
+EOF
+
+    chown -R root:root .
+
+    makepkg --linkadd y --chown n $OUTPUT/$PRGNAM-$VERSION-$ARCH-$BUILD$TAG.txz
+
+    [ "x$INSTALL" == "x--install" ] && installpkg $OUTPUT/$PRGNAM-$VERSION-$ARCH-$BUILD$TAG.txz
+
+}
+
 if [ "x$PACKAGE_ALL_LOCALS" == "x--backup" ]; then
     for g in $(list_local_gems_with_versions); do
         $0 $INSTALL $DRY_RUN --nodeps --tag $TAG --bindir $BINDIR --gem $(echo $g | tr \; \ )
     done
     exit 0
-fi
-
-if [ $EXPERIMENTAL == YES ]; then
-    if [ "x$MAKE_DEPS" == "x" ]; then
-        CURRENT_GEMS=$(list_local_gems_with_versions)
-    fi
 fi
 
 if [ "x$DRY_RUN" == "x--dry-run" ]; then
@@ -140,30 +163,28 @@ else
         --force \
         $MAKE_DEPS
 
-    cd $PKG
+    if [ "x$MAKE_DEPS" == "x" ]; then
+        for i in $PKG$GEMSROOT/gems/* ; do
+            i=$(basename $i)
+            this_GEM_VERSION=$(echo $i | rev | cut -d- -f1 | rev)
+            this_GEM=$(echo $i | sed "s|-$this_GEM_VERSION||")
 
-    PRGNAM=rubygem-$(grep "s\.name = " $PKG$GEMSROOT/specifications/*.gemspec | grep -o "%q{.*}" | sed 's|%q{||' | tr -d '}')
-    VERSION=$(grep "s\.version = " $PKG$GEMSROOT/specifications/*.gemspec | grep -o "\".*\"" | tr -d '"')
-    ARCH=$([[ $(find $PKG$GEMSROOT -name \*.o -o -name \*.so | wc -l) > 0 ]] && echo $(uname -m) || echo noarch)
+            [ -e $TMP/pkg-rubygem-$GEM-$this_GEM ] && rm -fr $TMP/pkg-rubygem-$GEM-$this_GEM
+            mkdir -p $TMP/pkg-rubygem-$GEM-$this_GEM$GEMSROOT/{cache,doc,gems,specifications}
+            mv $PKG$GEMSROOT/cache/$i.gem $TMP/pkg-rubygem-$GEM-$this_GEM$GEMSROOT/cache/
+            mv $PKG$GEMSROOT/specifications/$i.gemspec $TMP/pkg-rubygem-$GEM-$this_GEM$GEMSROOT/specifications/
+            mv $PKG$GEMSROOT/gems/$i $TMP/pkg-rubygem-$GEM-$this_GEM$GEMSROOT/gems/
+            mv $PKG$GEMSROOT/doc/$i $TMP/pkg-rubygem-$GEM-$this_GEM$GEMSROOT/doc/
+            if [ -e $TMP/pkg-rubygem-$GEM-$this_GEM$GEMSROOT/gems/$i/bin/ ]; then
+                mkdir -p $TMP/pkg-rubygem-$GEM-$this_GEM$BINDIR
+                for b in $TMP/pkg-rubygem-$GEM-$this_GEM$GEMSROOT/gems/$i/bin/* ; do
+                    mv $PKG$BINDIR/$(basename $b) $TMP/pkg-rubygem-$GEM-$this_GEM$BINDIR/
+                done
+            fi
 
-    mkdir -p $PKG/install
-    cat <<EOF > $PKG/install/slack-desc
-$PRGNAM: $PRGNAM ($(grep "s\.summary = " $PKG$GEMSROOT/specifications/*.gemspec | grep -o "%q{.*}" | sed 's|%q{||' | tr -d '}'))
-$PRGNAM:
-$PRGNAM: $(grep "s\.description = " $PKG$GEMSROOT/specifications/*.gemspec | grep -o "%q{.*}" | sed 's|%q{||' | tr -d '}')
-$PRGNAM:
-$PRGNAM:
-$PRGNAM:
-$PRGNAM:
-$PRGNAM:
-$PRGNAM:
-$PRGNAM: $(grep "s\.homepage = " $PKG$GEMSROOT/specifications/*.gemspec | grep -o "%q{.*}" | sed 's|%q{||' | tr -d '}')
-$PRGNAM:
-EOF
-
-    chown -R root:root .
-
-    makepkg --linkadd y --chown n $OUTPUT/$PRGNAM-$VERSION-$ARCH-$BUILD$TAG.txz
-
-    [ "x$INSTALL" == "x--install" ] && installpkg $OUTPUT/$PRGNAM-$VERSION-$ARCH-$BUILD$TAG.txz
+            package_this $TMP/pkg-rubygem-$GEM-$this_GEM $INSTALL
+        done
+    else
+        package_this $PKG $INSTALL
+    fi
 fi
