@@ -1,7 +1,7 @@
 -*- mode: org -*-
 
 * Short-term
-** rewrite --backup based on the same method as --deps. no need to reinstall all gems, much faster...
+** rewrite --backup based on the same method as --deps but directly on $GEMSROOT. no need to reinstall all gems, much faster...
 ** man page
 ** slackbuild
 ** --stash <dir> #if given, --backup will not build gems' packages already present in <dir>/
