@@ -104,15 +104,13 @@ done
 PKG=${PKG:-$TMP/pkg-rubygem-$GEM}
 
 function list_local_gems_with_versions() {
-    llgwv_LIST=""
     for g in $(gem list | tr -d \( | tr -d \) | tr \  % | sed 's|,%|,|g'); do
         current_gem=$(echo $g | cut -d% -f1)
         for v in $(echo $g | cut -d% -f2 | sed 's|,|\
 |g'); do
-            llgwv_LIST=$(echo -e "$llgwv_LIST\n$current_gem;--version;$v")
+            echo "$current_gem;--version;$v"
         done
     done
-    echo "$llgwv_LIST"
 }
 
 if [ "x$PACKAGE_ALL_LOCALS" == "x--backup" ]; then
