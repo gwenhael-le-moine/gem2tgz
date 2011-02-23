@@ -159,20 +159,19 @@ function package_all_under() {
 
 if [ "x$PACKAGE_ALL_LOCALS" == "x--backup" ]; then
     package_all_under $GEMSROOT
-    exit 0
-fi
-
-rm -fr $PKG
-
-mkdir -p $PKG$GEMSROOT
-
-gem install $GEM $VERSION \
-    --install-dir $PKG$GEMSROOT \
-    --force \
-    $MAKE_DEPS
-
-if [ "x$MAKE_DEPS" == "x" ]; then
-    package_all_under $PKG$GEMSROOT
 else
-    package_this $PKG $INSTALL
+    [ -e $PKG ] && rm -fr $PKG
+
+    mkdir -p $PKG$GEMSROOT
+
+    gem install $GEM $VERSION \
+        --install-dir $PKG$GEMSROOT \
+        --force \
+        $MAKE_DEPS
+
+    if [ "x$MAKE_DEPS" == "x" ]; then
+        package_all_under $PKG$GEMSROOT
+    else
+        package_this $PKG $INSTALL
+    fi
 fi
