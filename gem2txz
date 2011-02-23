@@ -167,9 +167,6 @@ function package_all_under() {
 
 if [ "x$PACKAGE_ALL_LOCALS" == "x--backup" ]; then
     package_all_under $GEMSROOT
-    # for g in $(list_local_gems_with_versions); do
-    #     $0 $INSTALL $DRY_RUN --nodeps --tag $TAG --bindir $BINDIR --gem $(echo $g | tr \; \ )
-    # done
     exit 0
 fi
 
@@ -188,26 +185,7 @@ else
         $MAKE_DEPS
 
     if [ "x$MAKE_DEPS" == "x" ]; then
-        for i in $PKG$GEMSROOT/gems/* ; do
-            i=$(basename $i)
-            this_GEM_VERSION=$(echo $i | rev | cut -d- -f1 | rev)
-            this_GEM=$(echo $i | sed "s|-$this_GEM_VERSION||")
-
-            [ -e $TMP/pkg-rubygem-$GEM-$this_GEM ] && rm -fr $TMP/pkg-rubygem-$GEM-$this_GEM
-            mkdir -p $TMP/pkg-rubygem-$GEM-$this_GEM$GEMSROOT/{cache,doc,gems,specifications}
-            mv $PKG$GEMSROOT/cache/$i.gem $TMP/pkg-rubygem-$GEM-$this_GEM$GEMSROOT/cache/
-            mv $PKG$GEMSROOT/specifications/$i.gemspec $TMP/pkg-rubygem-$GEM-$this_GEM$GEMSROOT/specifications/
-            mv $PKG$GEMSROOT/gems/$i $TMP/pkg-rubygem-$GEM-$this_GEM$GEMSROOT/gems/
-            mv $PKG$GEMSROOT/doc/$i $TMP/pkg-rubygem-$GEM-$this_GEM$GEMSROOT/doc/
-            if [ -e $TMP/pkg-rubygem-$GEM-$this_GEM$GEMSROOT/gems/$i/bin/ ]; then
-                mkdir -p $TMP/pkg-rubygem-$GEM-$this_GEM$BINDIR
-                for b in $TMP/pkg-rubygem-$GEM-$this_GEM$GEMSROOT/gems/$i/bin/* ; do
-                    mv $PKG$BINDIR/$(basename $b) $TMP/pkg-rubygem-$GEM-$this_GEM$BINDIR/
-                done
-            fi
-
-            package_this $TMP/pkg-rubygem-$GEM-$this_GEM $INSTALL
-        done
+        package_all_under $PKG$GEMSROOT
     else
         package_this $PKG $INSTALL
     fi
