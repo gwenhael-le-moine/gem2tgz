@@ -127,7 +127,7 @@ EOF
     makepkg --linkadd y --chown n $OUTPUT/$PRGNAM-$VERSION-$ARCH-$BUILD$TAG.txz
 
     [ "x$INSTALL" == "x--install" ] && installpkg $OUTPUT/$PRGNAM-$VERSION-$ARCH-$BUILD$TAG.txz
-    [ $CLEANUP == YES ] && rm -fr $package_this_PKG
+    [ "x$CLEANUP" == "xYES" ] && rm -fr $package_this_PKG
 }
 
 function package_all_under() {
