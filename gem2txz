@@ -51,6 +51,11 @@ do
             GEM=$1
             shift
             ;;
+        -o | --output )
+            shift
+            OUTPUT=$1
+            shift
+            ;;
         -v | --version )
             shift
             VERSION="--version $1"
@@ -69,6 +74,8 @@ do
             echo -e "\t\nBuild packages of dependencies [default]"
 	        echo -e "\t-i | --install"
             echo -e "\t\tInstall the package"
+	        echo -e "\t-o | --output <dir>"
+            echo -e "\t\tDirectory where the resulting package will be [default: /tmp]"
 	        echo -e "\t-t | --tag <tag>"
             echo -e "\t\tSet a specific tag for the package's name [default: $TAG]"
 	        echo -e "\t-a | --backup | --all-locals"
