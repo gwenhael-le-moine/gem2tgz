@@ -6,7 +6,6 @@
 MAKE_DEPS=${MAKE_DEPS:-}
 PACKAGE_ALL_LOCALS=${PACKAGE_ALL_LOCALS:-}
 INSTALL=${INSTALL:-}
-DRY_RUN=${DRY_RUN:-}
 VERSION=${VERSION:-}
 
 ARCH=${ARCH:-noarch}
@@ -48,10 +47,6 @@ do
             INSTALL=--install
             shift
             ;;
-        -f | --dry-run )
-            DRY_RUN=--dry-run
-            shift
-            ;;
         -g | --gem )
             shift
             GEM=$1
@@ -75,8 +70,6 @@ do
             echo -e "\t\nBuild packages of dependencies [default]"
 	        echo -e "\t-i | --install"
             echo -e "\t\tInstall the package"
-	        echo -e "\t-f | --dry-run"
-            echo -e "\t\tOnly display what would be done"
 	        echo -e "\t-b | --bindir </path>"
             echo -e "\t\tSet a non-standard location where to install binaries [default: /usr/bin]"
 	        echo -e "\t-t | --tag <tag>"
@@ -170,23 +163,18 @@ if [ "x$PACKAGE_ALL_LOCALS" == "x--backup" ]; then
     exit 0
 fi
 
-if [ "x$DRY_RUN" == "x--dry-run" ]; then
-    echo $0 $GEM $VERSION
-    exit 0
+rm -fr $PKG
+
+mkdir -p $PKG$GEMSROOT
+
+gem install $GEM $VERSION \
+    --install-dir $PKG$GEMSROOT \
+    --bindir $PKG$BINDIR \
+    --force \
+    $MAKE_DEPS
+
+if [ "x$MAKE_DEPS" == "x" ]; then
+    package_all_under $PKG$GEMSROOT
 else
-    rm -fr $PKG
-
-    mkdir -p $PKG$GEMSROOT
-
-    gem install $GEM $VERSION \
-        --install-dir $PKG$GEMSROOT \
-        --bindir $PKG$BINDIR \
-        --force \
-        $MAKE_DEPS
-
-    if [ "x$MAKE_DEPS" == "x" ]; then
-        package_all_under $PKG$GEMSROOT
-    else
-        package_this $PKG $INSTALL
-    fi
+    package_this $PKG $INSTALL
 fi
