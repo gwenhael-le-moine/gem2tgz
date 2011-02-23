@@ -13,7 +13,6 @@ BUILD=${BUILD:-1}
 TAG=${TAG:-$(basename $0)}
 OUTPUT=${OUTPUT:-/tmp}
 TMP=${TMP:-/tmp/$TAG}
-BINDIR=${BINDIR:-/usr/bin}
 
 GEMSROOT=${GEMSROOT:-$(gem environment gemdir)}
 
@@ -21,11 +20,6 @@ GEMSROOT=${GEMSROOT:-$(gem environment gemdir)}
 while [ "x$1" != "x" ]
 do
     case "$1" in
-        -b | --bindir )
-            shift
-            BINDIR=$1
-            shift
-            ;;
         -t | --tag )
             shift
             TAG=$1
@@ -70,8 +64,6 @@ do
             echo -e "\t\nBuild packages of dependencies [default]"
 	        echo -e "\t-i | --install"
             echo -e "\t\tInstall the package"
-	        echo -e "\t-b | --bindir </path>"
-            echo -e "\t\tSet a non-standard location where to install binaries [default: /usr/bin]"
 	        echo -e "\t-t | --tag <tag>"
             echo -e "\t\tSet a specific tag for the package's name [default: $TAG]"
 	        echo -e "\t-a | --backup | --all-locals"
@@ -147,9 +139,9 @@ function package_all_under() {
         cp -a $this_GEMSROOT/gems/$i $TMP/pkg-rubygem-$this_GEM-$this_GEM_VERSION$GEMSROOT/gems/
         cp -a $this_GEMSROOT/doc/$i $TMP/pkg-rubygem-$this_GEM-$this_GEM_VERSION$GEMSROOT/doc/
         if [ -e $TMP/pkg-rubygem-$this_GEM-$this_GEM_VERSION$GEMSROOT/gems/$i/bin/ ]; then
-            mkdir -p $TMP/pkg-rubygem-$this_GEM-$this_GEM_VERSION$this_GEMSROOT/../../../../bin/
+            mkdir -p $TMP/pkg-rubygem-$this_GEM-$this_GEM_VERSION/usr/bin/
             for b in $TMP/pkg-rubygem-$this_GEM-$this_GEM_VERSION$GEMSROOT/gems/$i/bin/* ; do
-                cp -a $this_GEMSROOT/../../../../bin/$(basename $b) $TMP/pkg-rubygem-$this_GEM-$this_GEM_VERSION$this_GEMSROOT/../../../../bin/
+                cp -a $this_GEMSROOT/../../../../bin/$(basename $b) $TMP/pkg-rubygem-$this_GEM-$this_GEM_VERSION/usr/bin/
             done
         fi
 
@@ -169,7 +161,6 @@ mkdir -p $PKG$GEMSROOT
 
 gem install $GEM $VERSION \
     --install-dir $PKG$GEMSROOT \
-    --bindir $PKG$BINDIR \
     --force \
     $MAKE_DEPS
 
