@@ -9,7 +9,7 @@ CLEANUP=${CLEANUP:-}
 INSTALL=${INSTALL:-}
 VERSION=${VERSION:-}
 
-ARCH=${ARCH:-noarch}
+ARCH=noarch
 BUILD=${BUILD:-1}
 TAG=${TAG:-$(basename $0)}
 OUTPUT=${OUTPUT:-/tmp}
