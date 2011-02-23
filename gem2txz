@@ -101,7 +101,6 @@ function list_local_gems_with_versions() {
 
 function package_this() {
     package_this_PKG=$1
-    INSTALL=$2
 
     cd $package_this_PKG
 
@@ -134,6 +133,7 @@ EOF
 
 function package_all_under() {
     this_GEMSROOT=$1
+
     for i in $this_GEMSROOT/gems/* ; do
         i=$(basename $i)
         this_GEM_VERSION=$(echo $i | rev | cut -d- -f1 | rev)
@@ -154,7 +154,6 @@ function package_all_under() {
 
         package_this $TMP/pkg-rubygem-$this_GEM-$this_GEM_VERSION $INSTALL
     done
-
 }
 
 if [ "x$PACKAGE_ALL_LOCALS" == "x--backup" ]; then
@@ -172,6 +171,6 @@ else
     if [ "x$MAKE_DEPS" == "x" ]; then
         package_all_under $PKG$GEMSROOT
     else
-        package_this $PKG $INSTALL
+        package_this $PKG
     fi
 fi
