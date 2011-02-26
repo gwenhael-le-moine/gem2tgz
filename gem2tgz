@@ -17,77 +17,11 @@ TMP=${TMP:-/tmp/$TAG}
 
 GEMSROOT=${GEMSROOT:-$(gem environment gemdir)}
 
-# commandline arguments processing
-while [ "x$1" != "x" ]
-do
-    case "$1" in
-        -t | --tag )
-            shift
-            TAG=$1
-            shift
-            ;;
-        -a | --all-locals | --backup )
-            PACKAGE_ALL_LOCALS=--backup
-            shift
-            ;;
-        -c | --cleanup )
-            CLEANUP=YES
-            shift
-            ;;
-        -n | --nodeps )
-            MAKE_DEPS=--ignore-dependencies
-            shift
-            ;;
-        -i | --install )
-            INSTALL=--install
-            shift
-            ;;
-        -g | --gem )
-            shift
-            GEM=$1
-            shift
-            ;;
-        -o | --output )
-            shift
-            OUTPUT=$1
-            shift
-            ;;
-        -v | --version )
-            shift
-            VERSION="--version $1"
-            shift
-            ;;
-        -h | --help )
-            echo -e "Usage: $0 <options>"
-            echo -e "Options:"
-	        echo -e "\t-a | --backup | --all-locals"
-            echo -e "\t\tGenerate packages for ALL gems installed locally"
-            echo -e ""
-	        echo -e "\t-g | --gem <name>"
-            echo -e "\t\tgem to package [no default]"
-	        echo -e "\t-v | --version <x.x.x>"
-            echo -e "\t\tPackage a specific version [default: latest]"
-	        echo -e "\t-t | --tag <tag>"
-            echo -e "\t\tSet a specific tag for the package's name [default: $TAG]"
-	        echo -e "\t-n | --nodeps"
-            echo -e "\t\tDo not build packages of dependencies [default: package all dependencies]"
-	        echo -e "\t-i | --install"
-            echo -e "\t\tInstall the package [default: no]"
-	        echo -e "\t-o | --output <dir>"
-            echo -e "\t\tDirectory where the resulting package will be [default: /tmp]"
-	        echo -e ""
-	        echo -e "\t-h | --help"
-            echo -e "\t\tWhat you're reading at this very moment"
-	        exit
-            ;;
-        * )
-            GEM=$1
-            shift
-            ;;
-    esac
-done
-
-PKG=${PKG:-$TMP/pkg-rubygem-$GEM}
+function list_duplicates() {
+    (cd /var/adm/packages/
+        ls rubygem-* | sed 's|\(.*\)-.*-.*-.*|\1|g' | uniq -d
+    )
+}
 
 function package_this() {
     package_this_PKG=$1
@@ -145,6 +79,85 @@ function package_all_under() {
         package_this $TMP/pkg-rubygem-$this_GEM-$this_GEM_VERSION $INSTALL
     done
 }
+
+# commandline arguments processing
+while [ "x$1" != "x" ]
+do
+    case "$1" in
+        -t | --tag )
+            shift
+            TAG=$1
+            shift
+            ;;
+        -a | --all-locals | --backup )
+            PACKAGE_ALL_LOCALS=--backup
+            shift
+            ;;
+        -d | --duplicates )
+            list_duplicates
+            exit 0
+            ;;
+        -c | --cleanup )
+            CLEANUP=YES
+            shift
+            ;;
+        -n | --nodeps )
+            MAKE_DEPS=--ignore-dependencies
+            shift
+            ;;
+        -i | --install )
+            INSTALL=--install
+            shift
+            ;;
+        -g | --gem )
+            shift
+            GEM=$1
+            shift
+            ;;
+        -o | --output )
+            shift
+            OUTPUT=$1
+            shift
+            ;;
+        -v | --version )
+            shift
+            VERSION="--version $1"
+            shift
+            ;;
+        -h | --help )
+            echo -e "Usage: $0 <options>"
+            echo -e "Options:"
+	        echo -e "\t-a | --backup | --all-locals"
+            echo -e "\t\tGenerate packages for ALL gems installed locally"
+            echo -e "\t-d | --duplicates"
+            echo -e "\t\tDisplay a list of gems installed in more than one version"
+            echo -e "\t\t(can be used in /etc/slackpkg/blacklist)"
+            echo -e ""
+	        echo -e "\t-g | --gem <name>"
+            echo -e "\t\tgem to package [no default]"
+	        echo -e "\t-v | --version <x.x.x>"
+            echo -e "\t\tPackage a specific version [default: latest]"
+	        echo -e "\t-t | --tag <tag>"
+            echo -e "\t\tSet a specific tag for the package's name [default: $TAG]"
+	        echo -e "\t-n | --nodeps"
+            echo -e "\t\tDo not build packages of dependencies [default: package all dependencies]"
+	        echo -e "\t-i | --install"
+            echo -e "\t\tInstall the package [default: no]"
+	        echo -e "\t-o | --output <dir>"
+            echo -e "\t\tDirectory where the resulting package will be [default: /tmp]"
+	        echo -e ""
+	        echo -e "\t-h | --help"
+            echo -e "\t\tWhat you're reading at this very moment"
+	        exit
+            ;;
+        * )
+            GEM=$1
+            shift
+            ;;
+    esac
+done
+
+PKG=${PKG:-$TMP/pkg-rubygem-$GEM}
 
 if [ "x$PACKAGE_ALL_LOCALS" == "x--backup" ]; then
     package_all_under $GEMSROOT
