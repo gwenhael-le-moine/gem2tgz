@@ -89,16 +89,6 @@ done
 
 PKG=${PKG:-$TMP/pkg-rubygem-$GEM}
 
-function list_local_gems_with_versions() {
-    for g in $(gem list | tr -d \( | tr -d \) | tr \  % | sed 's|,%|,|g'); do
-        current_gem=$(echo $g | cut -d% -f1)
-        for v in $(echo $g | cut -d% -f2 | sed 's|,|\
-|g'); do
-            echo "$current_gem;--version;$v"
-        done
-    done
-}
-
 function package_this() {
     package_this_PKG=$1
 
