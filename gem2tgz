@@ -5,7 +5,7 @@
 
 MAKE_DEPS=${MAKE_DEPS:-}
 PACKAGE_ALL_LOCALS=${PACKAGE_ALL_LOCALS:-}
-CLEANUP=${CLEANUP:-}
+CLEAN_AFTER=${CLEAN_AFTER:-}
 INSTALL=${INSTALL:-}
 VERSION=${VERSION:-}
 
@@ -52,7 +52,7 @@ EOF
     makepkg --linkadd y --chown n $OUTPUT/$PRGNAM-$VERSION-$ARCH-$BUILD$TAG.txz
 
     [ "x$INSTALL" == "x--install" ] && installpkg $OUTPUT/$PRGNAM-$VERSION-$ARCH-$BUILD$TAG.txz
-    [ "x$CLEANUP" == "xYES" ] && rm -fr $package_this_PKG
+    [ "x$CLEAN_AFTER" == "xYES" ] && rm -fr $package_this_PKG
 }
 
 function package_all_under() {
@@ -80,6 +80,12 @@ function package_all_under() {
     done
 }
 
+function cleanup() {
+    for i in $(gem cleanup --dryrun | grep "^Dry" | cut -d\  -f6); do
+        removepkg rubygem-$i
+    done
+}
+
 # commandline arguments processing
 while [ "x$1" != "x" ]
 do
@@ -97,8 +103,8 @@ do
             list_duplicates
             exit 0
             ;;
-        -c | --cleanup )
-            CLEANUP=YES
+        -c | --clean-after )
+            CLEAN_AFTER=YES
             shift
             ;;
         -n | --nodeps )
@@ -145,6 +151,8 @@ do
             echo -e "\t\tInstall the package [default: no]"
 	        echo -e "\t-o | --output <dir>"
             echo -e "\t\tDirectory where the resulting package will be [default: /tmp]"
+	        echo -e "\t-c | --clean-after"
+            echo -e "\t\tDelete temporary files after packaging [default: no]"
 	        echo -e ""
 	        echo -e "\t-h | --help"
             echo -e "\t\tWhat you're reading at this very moment"
