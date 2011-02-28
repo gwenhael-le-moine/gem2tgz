@@ -82,7 +82,7 @@ function package_all_under() {
 
 function cleanup() {
     for i in $(gem cleanup --dryrun | grep "^Dry" | cut -d\  -f6); do
-        removepkg rubygem-$i
+        removepkg /var/adm/packages/rubygem-$i-*
     done
 }
 
