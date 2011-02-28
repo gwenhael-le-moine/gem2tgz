@@ -90,34 +90,34 @@ function cleanup() {
 while [ "x$1" != "x" ]
 do
     case "$1" in
-        -t | --tag )
-            shift
-            TAG=$1
-            shift
-            ;;
         -a | --all-locals | --backup )
             PACKAGE_ALL_LOCALS=--backup
+            shift
+            ;;
+        -r | --cleanup )
+            cleanup
+            exit 0
+            ;;
+        
+        -c | --clean-after )
+            CLEAN_AFTER=YES
             shift
             ;;
         -d | --duplicates )
             list_duplicates
             exit 0
             ;;
-        -c | --clean-after )
-            CLEAN_AFTER=YES
+        -g | --gem )
             shift
-            ;;
-        -n | --nodeps )
-            MAKE_DEPS=--ignore-dependencies
+            GEM=$1
             shift
             ;;
         -i | --install )
             INSTALL=--install
             shift
             ;;
-        -g | --gem )
-            shift
-            GEM=$1
+        -n | --nodeps )
+            MAKE_DEPS=--ignore-dependencies
             shift
             ;;
         -o | --output )
@@ -125,11 +125,17 @@ do
             OUTPUT=$1
             shift
             ;;
+        -t | --tag )
+            shift
+            TAG=$1
+            shift
+            ;;
         -v | --version )
             shift
             VERSION="--version $1"
             shift
             ;;
+
         -h | --help )
             echo -e "Usage: $0 <options>"
             echo -e "Options:"
@@ -138,6 +144,8 @@ do
             echo -e "\t-d | --duplicates"
             echo -e "\t\tDisplay a list of gems installed in more than one version"
             echo -e "\t\t(can be used in /etc/slackpkg/blacklist)"
+	        echo -e "\t-r | --cleanup"
+            echo -e "\t\t'gem cleanup' at Slackware packaging level"
             echo -e ""
 	        echo -e "\t-g | --gem <name>"
             echo -e "\t\tgem to package [no default]"
