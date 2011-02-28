@@ -94,11 +94,6 @@ do
             PACKAGE_ALL_LOCALS=--backup
             shift
             ;;
-        -r | --cleanup )
-            cleanup
-            exit 0
-            ;;
-        
         -c | --clean-after )
             CLEAN_AFTER=YES
             shift
@@ -124,6 +119,10 @@ do
             shift
             OUTPUT=$1
             shift
+            ;;
+        -r | --cleanup )
+            cleanup
+            exit 0
             ;;
         -t | --tag )
             shift
