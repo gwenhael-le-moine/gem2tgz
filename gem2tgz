@@ -32,6 +32,13 @@ function package_this() {
     VERSION=$(grep "s\.version = " $package_this_PKG$GEMSROOT/specifications/*.gemspec | grep -o "\".*\"" | tr -d '"')
     ARCH=$([[ $(find $package_this_PKG$GEMSROOT -name \*.o -o -name \*.so | wc -l) > 0 ]] && echo $(uname -m) || echo noarch)
 
+	if [ -d $package_this_PKG$GEMSROOT/bin/ ]; then
+		mkdir -p $package_this_PKG/usr/bin
+		for b in $package_this_PKG$GEMSROOT/bin/*; do
+		    cp $b $package_this_PKG/usr/bin
+		done
+	fi
+
     mkdir -p $package_this_PKG/install
     cat <<EOF > $package_this_PKG/install/slack-desc
 $PRGNAM: $PRGNAM ($(grep "s\.summary = " $package_this_PKG$GEMSROOT/specifications/*.gemspec | grep -o "%q{.*}" | sed 's|%q{||' | tr -d '}'))
@@ -70,9 +77,9 @@ function package_all_under() {
         cp -a $this_GEMSROOT/gems/$i $TMP/pkg-rubygem-$this_GEM-$this_GEM_VERSION$GEMSROOT/gems/
         cp -a $this_GEMSROOT/doc/$i $TMP/pkg-rubygem-$this_GEM-$this_GEM_VERSION$GEMSROOT/doc/
         if [ -e $TMP/pkg-rubygem-$this_GEM-$this_GEM_VERSION$GEMSROOT/gems/$i/bin/ ]; then
-            mkdir -p $TMP/pkg-rubygem-$this_GEM-$this_GEM_VERSION/usr/bin/
+            mkdir -p $TMP/pkg-rubygem-$this_GEM-$this_GEM_VERSION$GEMSROOT/bin/
             for b in $TMP/pkg-rubygem-$this_GEM-$this_GEM_VERSION$GEMSROOT/gems/$i/bin/* ; do
-                cp -a $this_GEMSROOT/../../../../bin/$(basename $b) $TMP/pkg-rubygem-$this_GEM-$this_GEM_VERSION/usr/bin/
+                cp -a $this_GEMSROOT/bin/$(basename $b) $TMP/pkg-rubygem-$this_GEM-$this_GEM_VERSION$GEMSROOT/bin/
             done
         fi
 
