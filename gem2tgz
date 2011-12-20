@@ -29,6 +29,8 @@ function package_this() {
     cd $package_this_PKG
 
     PRGNAM=rubygem-$(grep "s\.name = " $package_this_PKG$GEMSROOT/specifications/*.gemspec | grep -o "%q{.*}" | sed 's|%q{||' | tr -d '}')
+	# HACK: fallback name pulling for gems not using "%q{.*}"
+	[ "x$PRGNAM" == "xrubygem-" ] && PRGNAM=rubygem-$(grep "s\.name = " $package_this_PKG$GEMSROOT/specifications/*.gemspec | grep -o "\".*\"" | tr -d \")
     VERSION=$(grep "s\.version = " $package_this_PKG$GEMSROOT/specifications/*.gemspec | grep -o "\".*\"" | tr -d '"')
     ARCH=$([[ $(find $package_this_PKG$GEMSROOT -name \*.o -o -name \*.so | wc -l) > 0 ]] && echo $(uname -m) || echo noarch)
 
